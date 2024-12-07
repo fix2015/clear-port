@@ -1,32 +1,48 @@
 import http from 'http';
 import isPortReachable from 'is-port-reachable';
-import kill from './index.js';
-const port = 3000
+import portUtil from './index.js';
 
-const server = http.createServer((req, res) => {
-  res.writeHead(200, {
-    'Content-Type': 'text/plain'
-  })
+const PORT = 3000;
+const SERVER_OPTIONS = {
+  method: 'tcp',
+  verbose: true,
+  action: 'kill'
+};
 
-  res.end('Hi!')
-})
-
-async function chekPort() {
+async function checkPortAndStartServer(port) {
+  try {
     const isOccupied = await isPortReachable(port, { host: 'localhost' });
+    console.log(`Port ${port} is ${isOccupied ? 'occupied' : 'available'}`);
 
-    if(isOccupied) {
-        await kill(port);
+    if (isOccupied) {
+      console.log(`Attempting to free up port ${port}...`);
+      await portUtil(port, { action: 'kill', method: 'tcp', verbose: true });
     }
 
-    server.listen(port, () => {
-      console.log('started listening on port', port)
-      setTimeout(() => {
-        console.log('killing port', port)
-        kill(port)
-          .then(console.log)
-          .catch(console.log)
-      }, 1000)
-    })
+    startServer(port);
+  } catch (error) {
+    console.error(`Error checking port ${port}:`, error);
+  }
 }
 
-chekPort()
+function startServer(port) {
+  const server = http.createServer((req, res) => {
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.end('Hi!');
+  });
+
+  server.listen(port, () => {
+    console.log(`Server is listening on port ${port}`);
+  });
+}
+
+(async function main() {
+  try {
+    console.log('Starting port utility...');
+    await portUtil(PORT, SERVER_OPTIONS);
+    console.log('Port existence check completed.');
+    await checkPortAndStartServer(PORT);
+  } catch (error) {
+    console.error('Error during initialization:', error);
+  }
+})();

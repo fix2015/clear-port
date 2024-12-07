@@ -4,31 +4,35 @@ import sh from 'shell-exec';
 import readline from 'readline';
 
 /**
- * A class to manage port killing operations
+ * A class to manage port operations (kill, check, or verify existence).
  */
-class PortKiller {
+class PortClient {
   /**
-   * Creates an instance of PortKiller
-   * @param {string | number | number[]} ports - Ports to be killed.
+   * Creates an instance of PortClient
+   * @param {string | number | number[]} ports - Ports to be checked or killed.
    * @param {Object} options - Options for the operation.
    */
   constructor(ports, {
     method = 'tcp',
+    action = 'check', // Default action is 'check'
     interactive = false,
     dryRun = false,
     verbose = false,
     graceful = false,
     filter = null,
     range = null,
+    speed = 'safe', // Default speed is 'safe'
   } = {}) {
     this.ports = ports;
     this.method = method;
+    this.action = action; // Action flag to decide whether to check, kill, or show existence
     this.interactive = interactive;
     this.dryRun = dryRun;
     this.verbose = verbose;
     this.graceful = graceful;
     this.filter = filter;
     this.range = range;
+    this.speed = speed; // Store the speed option
     this.platform = process.platform;
   }
 
@@ -59,7 +63,7 @@ class PortKiller {
   }
 
   /**
-   * Executes the port killing operation.
+   * Executes the port operation based on the action flag.
    * @returns {Promise<void>}
    */
   async execute() {
@@ -69,7 +73,7 @@ class PortKiller {
     }
 
     if (this.dryRun) {
-      console.log(`Dry run: Ports to kill - ${parsedPorts.join(', ')}`);
+      console.log(`Dry run: Ports to operate on - ${parsedPorts.join(', ')}`);
       return;
     }
 
@@ -77,19 +81,23 @@ class PortKiller {
     if (this.interactive) {
       const activePorts = await this.listActivePorts();
       const selectedPorts = await this.promptUserToSelectPorts(activePorts);
-      return this.killPorts(selectedPorts);
+      return this.handlePorts(selectedPorts);
     }
 
-    // Kill the ports
-    return this.killPorts(parsedPorts);
+    // Handle the ports based on the action
+    return this.handlePorts(parsedPorts);
   }
 
   /**
-   * Lists active ports based on the platform.
+   * Lists active ports based on the platform and speed flag.
    * @returns {Promise<string[]>} List of active ports.
    */
   async listActivePorts() {
-    const command = this.platform === 'win32' ? 'netstat -nao' : 'lsof -i -P';
+    const command = this.platform === 'win32' 
+      ? 'netstat -nao' 
+      : (this.speed === 'fast' 
+        ? `lsof -i :${this.ports}`  // Use fast option
+        : 'lsof -i -P');  // Default to safe option
 
     try {
       const { stdout } = await sh(command);
@@ -106,7 +114,7 @@ class PortKiller {
    * @returns {string[]} The parsed active ports.
    */
   parseWindowsPorts(lines) {
-    const regex = new RegExp(`^ *${this.method.toUpperCase()} *[^ ]*:(\\d+)`, 'gm');
+    const regex = new RegExp(`^ *${this.method.toUpperCase()} *[^ ]*:(\\d+),`, 'gm');
     return lines.reduce((acc, line) => {
       const match = line.match(regex);
       if (match && match[1] && !acc.includes(match[1])) {
@@ -145,13 +153,72 @@ class PortKiller {
         console.log(`${index + 1}. ${port}`);
       });
 
-      rl.question('Select ports to kill (comma-separated indices): ', (answer) => {
+      rl.question('Select ports to operate on (comma-separated indices): ', (answer) => {
         const indices = answer.split(',').map(Number);
         const selectedPorts = indices.map((index) => activePorts[index - 1]).filter(Boolean);
         rl.close();
         resolve(selectedPorts);
       });
     });
+  }
+
+  /**
+   * Handles the operation (check, isExist, or kill) for the given ports.
+   * @param {number[]} ports - The ports to handle.
+   * @returns {Promise<void>}
+   */
+  async handlePorts(ports) {
+    if (this.action === 'check') {
+      // Show info about the port
+      return this.showPortInfo(ports);
+    }
+
+    if (this.action === 'isExist') {
+      // Just check if the port exists
+      return this.showPortInfo(ports);
+    }
+
+    if (this.action === 'kill') {
+      // Kill the port
+      return this.killPorts(ports);
+    }
+  }
+
+  async isExistFast(port) {
+    const { stdout } = await sh(`lsof -i :${port}`);
+
+    return stdout.includes('LISTEN');
+  }
+
+  async isExistNormal(port) {
+    const activePorts = await this.listActivePorts();
+    console.log(activePorts)
+
+    return activePorts.includes(String(port));
+  }
+
+  /**
+   * Shows information about the given ports.
+   * @param {number[]} ports - The ports to check.
+   */
+  async showPortInfo(ports) {
+    for (const port of ports) {
+      if (this.speed === 'fast') {
+        try {
+          const isExit = await this.isExistFast(port);
+          console.log(isExit ? `Port ${port} is active.` : `Port ${port} is not active.`);
+        } catch (error) {
+          console.error(`Error checking port ${port}: ${error.message}`);
+        }
+      } else {
+        try {
+          const isExit = await this.isExistNormal(port);
+          console.log(isExit ? `Port ${port} is active.` : `Port ${port} is not active.`);
+        } catch (error) {
+          console.error(`Error retrieving active ports: ${error.message}`);
+        }
+      }
+    }
   }
 
   /**
@@ -184,7 +251,7 @@ class PortKiller {
     try {
       const { stdout } = await sh('netstat -nao');
       const lines = stdout.split('\n');
-      const regex = new RegExp(`^ *${this.method.toUpperCase()} *[^ ]*:${port}`, 'gm');
+      const regex = new RegExp(`^ *${this.method.toUpperCase()} *[^ ]*:${port},`, 'gm');
       const linesWithPort = lines.filter(line => regex.test(line));
 
       const pids = linesWithPort.reduce((acc, line) => {
@@ -212,11 +279,14 @@ class PortKiller {
     const killCommand = graceful ? 'kill' : 'kill -9';
 
     try {
-      const { stdout } = await sh(`lsof -i :${port}`);
-      const lines = stdout.split('\n');
-      const existsProcess = lines.some(line => line.includes(`LISTEN`));
+      let existProccess = null;
+      if(this.speed === 'fast') {
+        existProccess = await this.isExistFast(port);
+      } else {
+        existProccess = await this.isExistNormal(port);
+      }
 
-      if (!existsProcess) throw new Error('No process running on port');
+      if (!existProccess) throw new Error('No process running on port');
 
       return `${baseCommand} ${killCommand}`;
     } catch (error) {
@@ -227,11 +297,11 @@ class PortKiller {
 
 /**
  * Main entry point to the script.
- * @param {string | number | number[]} ports - Ports to be killed.
+ * @param {string | number | number[]} ports - Ports to be operated on.
  * @param {Object} options - Options for the operation.
  * @returns {Promise<void>}
  */
 export default async function (ports, options = {}) {
-  const portKiller = new PortKiller(ports, options);
-  return portKiller.execute();
+  const portClient = new PortClient(ports, options);
+  return portClient.execute();
 }
