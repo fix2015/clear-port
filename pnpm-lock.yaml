@@ -1,0 +1,48 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    dependencies:
+      get-them-args:
+        specifier: ^1.3.2
+        version: 1.3.2
+      is-port-reachable:
+        specifier: ^4.0.0
+        version: 4.0.0
+      readline:
+        specifier: ^1.3.0
+        version: 1.3.0
+      shell-exec:
+        specifier: ^1.0.2
+        version: 1.1.2
+
+packages:
+
+  get-them-args@1.3.2:
+    resolution: {integrity: sha512-LRn8Jlk+DwZE4GTlDbT3Hikd1wSHgLMme/+7ddlqKd7ldwR6LjJgTVWzBnR01wnYGe4KgrXjg287RaI22UHmAw==}
+
+  is-port-reachable@4.0.0:
+    resolution: {integrity: sha512-9UoipoxYmSk6Xy7QFgRv2HDyaysmgSG75TFQs6S+3pDM7ZhKTF/bskZV+0UlABHzKjNVhPjYCLfeZUEg1wXxig==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+
+  readline@1.3.0:
+    resolution: {integrity: sha512-k2d6ACCkiNYz222Fs/iNze30rRJ1iIicW7JuX/7/cozvih6YCkFZH+J6mAFDVgv0dRBaAyr4jDqC95R2y4IADg==}
+
+  shell-exec@1.1.2:
+    resolution: {integrity: sha512-v2NWVDP0ws+S7miKy2oSpJ/OuL6NKuMosPNUZLDWFBlMnBtuoZxZOwxpQJwhsFZgMb+r7frpDTT8p4OSnhkpsg==}
+    engines: {node: '>=12'}
+
+snapshots:
+
+  get-them-args@1.3.2: {}
+
+  is-port-reachable@4.0.0: {}
+
+  readline@1.3.0: {}
+
+  shell-exec@1.1.2: {}
