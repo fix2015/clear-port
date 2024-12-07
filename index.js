@@ -1,7 +1,7 @@
 'use strict';
 
-import sh from 'shell-exec';
-import readline from 'readline';
+const sh = require('shell-exec');
+const readline = require('readline')
 
 /**
  * A class to manage port operations (kill, check, or verify existence).
@@ -301,7 +301,7 @@ class PortClient {
  * @param {Object} options - Options for the operation.
  * @returns {Promise<void>}
  */
-export default async function (ports, options = {}) {
+module.exports = async function (ports, options = {}) {
   const portClient = new PortClient(ports, options);
   return portClient.execute();
 }

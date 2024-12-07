@@ -25,7 +25,6 @@
     "development-tool",
     "port-client"
   ],
-  "type": "module",
   "author": "Semianchuk Vitalii",
   "license": "ISC",
   "bugs": {

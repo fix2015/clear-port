@@ -1,11 +1,9 @@
 #!/usr/bin/env node
 'use strict';
 
-import portUtil from './index.js';
-import getThemArgs from 'get-them-args';
-
+const portUtil = require('./index.js');
+const getThemArgs = require('get-them-args');
 const args = getThemArgs(process.argv.slice(2));
-
 const verbose = args.verbose || false;
 let port = args.port ? args.port.toString().split(',') : args.unknown;
 const method = args.method || 'tcp';
