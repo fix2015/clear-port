@@ -1,0 +1,36 @@
+{
+  "name": "clean-port",
+  "version": "1.0.0",
+  "description": "A utility for killing processes running on specified ports, with support for multiple ports, interactive mode, graceful termination, and more.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fix2015/clean-port.git"
+  },
+  "keywords": [
+    "kill-port",
+    "port-management",
+    "cli",
+    "nodejs",
+    "process-termination",
+    "tcp",
+    "udp",
+    "interactive-cli",
+    "development-tool"
+  ],
+  "type": "module",
+  "author": "Semianchuk Vitalii",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fix2015/clean-port/issues"
+  },
+  "homepage": "https://github.com/fix2015/clean-port#readme",
+  "dependencies": {
+    "is-port-reachable": "^4.0.0",
+    "readline": "^1.3.0",
+    "shell-exec": "^1.0.2"
+  }
+}

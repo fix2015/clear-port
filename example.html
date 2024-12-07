@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clean-Port Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        pre {
+            background: #333;
+            color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        code {
+            color: #black;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Clean-Port Example</h1>
+    <p><strong>Clean-Port</strong> is a Node.js utility for managing processes running on specific ports. Below are examples of how to use it.</p>
+
+    <div class="section">
+        <h2>Installation</h2>
+        <p>Install the package globally to use it as a CLI tool:</p>
+        <pre><code>npm install -g clean-port</code></pre>
+        <p>Or use it directly via <code>npx</code>:</p>
+        <pre><code>npx clean-port &lt;port&gt;</code></pre>
+    </div>
+
+    <div class="section">
+        <h2>CLI Usage</h2>
+        <h3>Kill a Single Port</h3>
+        <pre><code>npx clean-port 3000</code></pre>
+
+        <h3>Kill Multiple Ports</h3>
+        <pre><code>npx clean-port 3000 4000 5000</code></pre>
+
+        <h3>Interactive Mode</h3>
+        <p>List active ports and choose which ones to terminate:</p>
+        <pre><code>npx clean-port --interactive</code></pre>
+
+        <h3>Graceful Kill</h3>
+        <p>Attempt a graceful termination before forcefully killing:</p>
+        <pre><code>npx clean-port 3000 --graceful</code></pre>
+
+        <h3>Dry Run</h3>
+        <p>Preview the actions without actually killing processes:</p>
+        <pre><code>npx clean-port 3000 --dry-run</code></pre>
+
+        <h3>Kill a Range of Ports</h3>
+        <pre><code>npx clean-port --range 3000-3100</code></pre>
+    </div>
+
+    <div class="section">
+        <h2>Programmatic Usage</h2>
+        <p>You can also use <code>clean-port</code> in your JavaScript/Node.js projects.</p>
+        <h3>Example Code</h3>
+        <pre><code>const cleanPort = require('clean-port');
+
+(async () => {
+    try {
+        await cleanPort(3000, {
+            method: 'tcp',
+            graceful: true,
+            verbose: true
+        });
+        console.log('Successfully terminated processes on port 3000');
+    } catch (error) {
+        console.error('Failed to terminate processes:', error.message);
+    }
+})();</code></pre>
+    </div>
+
+    <div class="section">
+        <h2>More Information</h2>
+        <p>For detailed documentation, visit the project repository on GitHub or refer to the <code>README.md</code> file included in the package.</p>
+    </div>
+</body>
+</html>
