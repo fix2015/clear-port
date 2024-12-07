@@ -33,13 +33,13 @@ You can also use the `Port Client` class via a command-line interface by calling
 1. **To check port(s)**:
 
 ```
-node port-client 8080 3000 check
+npx port-client 8080 3000 check
 ```
 
 2. **To kill a port(s)**:
 
 ```
-node port-client 8080 3000 kill
+npx port-client 8080 3000 kill
 ```
 
 This script accepts a list of ports followed by an action (`check` or `kill`). The ports will be parsed, and the specified action will be executed.
@@ -49,7 +49,7 @@ This script accepts a list of ports followed by an action (`check` or `kill`). T
 You can enable **fast operations** in the CLI by using the `--fast` flag:
 
 ```
-node port-client 8080 3000 check --fast
+npx port-client 8080 3000 check --fast
 ```
 
 This will perform the operation 100 times faster by skipping extra checks.

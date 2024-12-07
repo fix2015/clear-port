@@ -1,7 +1,7 @@
 {
   "name": "port-client",
-  "version": "1.0.0",
-  "description": "A utility for killing processes running on specified ports, with support for multiple ports, interactive mode, graceful termination, and more.",
+  "version": "1.0.4",
+  "description": "A powerful utility for managing processes on specified ports, including options for checking port status, killing processes, handling multiple ports, enabling interactive mode, and supporting graceful termination.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
