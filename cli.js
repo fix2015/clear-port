@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 
-const portUtil = require('./index.js');
+const portUtil = require('./dist/index.js');
 const getThemArgs = require('get-them-args');
 const args = getThemArgs(process.argv.slice(2));
 const verbose = args.verbose || false;
@@ -33,12 +33,10 @@ Promise.all(
       range
     })
       .then((result) => {
-        console.log(`Process on port ${current}`);
-        verbose && console.log(result);
+        verbose && console.log(`Process on port ${action} ${current}`);
       })
       .catch((error) => {
-        console.log(`Could not process on port ${current}. ${error.message}.`);
-        verbose && console.log(error);
+        verbose && console.log(`Could not process on port ${current}. ${error.message}.`);
       });
   })
 );

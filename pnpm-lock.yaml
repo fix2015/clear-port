@@ -19,7 +19,7 @@ importers:
         version: 1.3.0
       shell-exec:
         specifier: ^1.0.2
-        version: 1.1.2
+        version: 1.0.2
 
 packages:
 
@@ -33,9 +33,8 @@ packages:
   readline@1.3.0:
     resolution: {integrity: sha512-k2d6ACCkiNYz222Fs/iNze30rRJ1iIicW7JuX/7/cozvih6YCkFZH+J6mAFDVgv0dRBaAyr4jDqC95R2y4IADg==}
 
-  shell-exec@1.1.2:
-    resolution: {integrity: sha512-v2NWVDP0ws+S7miKy2oSpJ/OuL6NKuMosPNUZLDWFBlMnBtuoZxZOwxpQJwhsFZgMb+r7frpDTT8p4OSnhkpsg==}
-    engines: {node: '>=12'}
+  shell-exec@1.0.2:
+    resolution: {integrity: sha512-jyVd+kU2X+mWKMmGhx4fpWbPsjvD53k9ivqetutVW/BQ+WIZoDoP4d8vUMGezV6saZsiNoW2f9GIhg9Dondohg==}
 
 snapshots:
 
@@ -45,4 +44,4 @@ snapshots:
 
   readline@1.3.0: {}
 
-  shell-exec@1.1.2: {}
+  shell-exec@1.0.2: {}

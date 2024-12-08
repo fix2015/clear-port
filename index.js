@@ -14,25 +14,25 @@ class PortClient {
    */
   constructor(ports, {
     method = 'tcp',
-    action = 'check', // Default action is 'check'
+    action = 'check',
     interactive = false,
     dryRun = false,
     verbose = false,
     graceful = false,
     filter = null,
     range = null,
-    speed = 'safe', // Default speed is 'safe'
+    speed = 'safe',
   } = {}) {
     this.ports = ports;
     this.method = method;
-    this.action = action; // Action flag to decide whether to check, kill, or show existence
+    this.action = action;
     this.interactive = interactive;
     this.dryRun = dryRun;
     this.verbose = verbose;
     this.graceful = graceful;
     this.filter = filter;
     this.range = range;
-    this.speed = speed; // Store the speed option
+    this.speed = speed; 
     this.platform = process.platform;
   }
 
@@ -73,18 +73,16 @@ class PortClient {
     }
 
     if (this.dryRun) {
-      console.log(`Dry run: Ports to operate on - ${parsedPorts.join(', ')}`);
+      this.success(`Dry run: Ports to operate on - ${parsedPorts.join(', ')}`);
       return;
     }
 
-    // Interactive mode: Display active ports and allow user to select
     if (this.interactive) {
       const activePorts = await this.listActivePorts();
       const selectedPorts = await this.promptUserToSelectPorts(activePorts);
       return this.handlePorts(selectedPorts);
     }
 
-    // Handle the ports based on the action
     return this.handlePorts(parsedPorts);
   }
 
@@ -96,8 +94,8 @@ class PortClient {
     const command = this.platform === 'win32' 
       ? 'netstat -nao' 
       : (this.speed === 'fast' 
-        ? `lsof -i :${this.ports}`  // Use fast option
-        : 'lsof -i -P');  // Default to safe option
+        ? `lsof -i :${this.ports}`  
+        : 'lsof -i -P -n');  
 
     try {
       const { stdout } = await sh(command);
@@ -130,14 +128,11 @@ class PortClient {
    * @returns {string[]} The parsed active ports.
    */
   parseUnixPorts(lines) {
-    const regex = new RegExp(`:${this.method === 'udp' ? 'udp' : 'tcp'}:(\\d+)`, 'gm');
-    return lines.reduce((acc, line) => {
-      const match = line.match(regex);
-      if (match && match[1] && !acc.includes(match[1])) {
-        acc.push(match[1]);
-      }
-      return acc;
-    }, []);
+
+    const regex = /(?<=:\d{1,5})->|\b\d{1,5}(?=->|\s+\(CLOSED\)|\s+\(ESTABLISHED\)|\s+\(LISTEN\))/g;
+
+    return lines.flatMap(line => line.match(regex)).filter(Boolean);
+
   }
 
   /**
@@ -150,7 +145,7 @@ class PortClient {
       const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
       activePorts.forEach((port, index) => {
-        console.log(`${index + 1}. ${port}`);
+        this.success(`${index + 1}. ${port}`);
       });
 
       rl.question('Select ports to operate on (comma-separated indices): ', (answer) => {
@@ -163,24 +158,22 @@ class PortClient {
   }
 
   /**
-   * Handles the operation (check, isExist, or kill) for the given ports.
-   * @param {number[]} ports - The ports to handle.
-   * @returns {Promise<void>}
+   * Handles the action on a list of ports based on the specified action type.
+   * 
+   * @param {number[]} ports - The list of port numbers to act upon.
+   * @returns {Promise} The result of the action performed.
    */
   async handlePorts(ports) {
-    if (this.action === 'check') {
-      // Show info about the port
-      return this.showPortInfo(ports);
-    }
+    switch (this.action) {
+      case 'check':
+      case 'isExist':
+        return this.showPortInfo(ports);
 
-    if (this.action === 'isExist') {
-      // Just check if the port exists
-      return this.showPortInfo(ports);
-    }
+      case 'kill':
+        return this.killPorts(ports);
 
-    if (this.action === 'kill') {
-      // Kill the port
-      return this.killPorts(ports);
+      default:
+        throw new Error(`Unknown action: ${this.action}`);
     }
   }
 
@@ -192,33 +185,56 @@ class PortClient {
 
   async isExistNormal(port) {
     const activePorts = await this.listActivePorts();
-    console.log(activePorts)
 
     return activePorts.includes(String(port));
   }
 
   /**
-   * Shows information about the given ports.
-   * @param {number[]} ports - The ports to check.
+   * Logs a success message in green.
+   * 
+   * @param {string} message - The success message to log.
+   * @returns {void}
+   */
+  success(message) {
+    console.log('\x1b[32m%s\x1b[0m', `${message}`);
+  }
+
+  /**
+   * Logs an error message in red.
+   * 
+   * @param {string} message - The error message to log.
+   * @returns {void}
+   */
+  error(message) {
+    console.log('\x1b[31m%s\x1b[0m', `${message}`);
+  }
+
+  /**
+   * Checks and logs the status of each port, indicating whether it is active or not.
+   * 
+   * @param {number[]} ports - An array of port numbers to check for activity.
    */
   async showPortInfo(ports) {
     for (const port of ports) {
-      if (this.speed === 'fast') {
-        try {
-          const isExit = await this.isExistFast(port);
-          console.log(isExit ? `Port ${port} is active.` : `Port ${port} is not active.`);
-        } catch (error) {
-          console.error(`Error checking port ${port}: ${error.message}`);
-        }
-      } else {
-        try {
-          const isExit = await this.isExistNormal(port);
-          console.log(isExit ? `Port ${port} is active.` : `Port ${port} is not active.`);
-        } catch (error) {
-          console.error(`Error retrieving active ports: ${error.message}`);
-        }
+      try {
+        const isActive = await this.checkPortStatus(port);
+
+        this.success(isActive ? `Port ${port} is active.` : `Port ${port} is not active.`);
+      } catch (error) {
+        this.error(`Error checking port ${port}: ${error.message}`);
       }
     }
+  }
+
+  /**
+   * Checks whether a given port is active based on the current speed setting.
+   * 
+   * @param {number} port - The port number to check.
+   * @returns {Promise<boolean>} A promise that resolves to a boolean indicating whether the port is active.
+   */
+  async checkPortStatus(port) {
+    const checkMethod = this.speed === 'fast' ? this.isExistFast : this.isExistNormal;
+    return await checkMethod.call(this, port);
   }
 
   /**
@@ -235,9 +251,9 @@ class PortClient {
 
         this.log(`Executing: ${command}`);
         const result = await sh(command);
-        this.log(`Successfully killed port ${port}: ${result.stdout}`);
+        this.success(`Successfully killed port ${port} ${result.stdout}`);
       } catch (error) {
-        console.error(`Failed to kill port ${port}: ${error.message}`);
+        this.error(`Failed to kill port ${port}: ${error.message}`);
       }
     }
   }
@@ -267,31 +283,53 @@ class PortClient {
   }
 
   /**
-   * Gets the Unix command to kill a port.
-   * @param {number} port - The port to kill.
-   * @param {string} method - The protocol (tcp/udp).
-   * @param {boolean} graceful - Whether to use a graceful kill.
-   * @returns {string} The Unix kill command.
+   * Constructs the Unix command to kill a process running on a specified port.
+   * The command will either gracefully or forcefully terminate the process, depending on the `graceful` parameter.
+   *
+   * @param {number} port - The port number where the process is running.
+   * @param {string} [method='tcp'] - The method (protocol) for the command (e.g., 'tcp' or 'udp'). Defaults to 'tcp'.
+   * @param {boolean} [graceful=false] - Whether to send a graceful kill signal (`true`) or a forceful one (`false`). Defaults to `false` (forceful kill).
+   * @returns {Promise<string>} The full Unix command string to kill the process.
+   * @throws {Error} Throws an error if no process is found running on the specified port.
    */
   async getUnixKillCommand(port, method = 'tcp', graceful = false) {
-    const baseCommand = `lsof -i ${method}:${port} | grep ${method.toUpperCase()} | awk '{print $2}' | xargs`;
-
+    const baseCommand = this.buildBaseCommand(method, port);
     const killCommand = graceful ? 'kill' : 'kill -9';
 
     try {
-      let existProccess = null;
-      if(this.speed === 'fast') {
-        existProccess = await this.isExistFast(port);
-      } else {
-        existProccess = await this.isExistNormal(port);
-      }
+      const processExists = await this.checkIfProcessExists(port);
 
-      if (!existProccess) throw new Error('No process running on port');
+      if (!processExists) {
+        throw new Error('No process running on port');
+      }
 
       return `${baseCommand} ${killCommand}`;
     } catch (error) {
-      throw new Error(`Failed to get Unix kill command: ${error.message}`);
+      throw new Error(`${error.message}`);
     }
+  }
+
+  /**
+   * Builds the base command for listing the process associated with a port and method.
+   * 
+   * @param {string} method - The method (protocol) for the command (e.g., 'tcp' or 'udp').
+   * @param {number} port - The port number where the process is running.
+   * @returns {string} The base command to find the process ID (PID) of the process running on the specified port and protocol.
+   */
+  buildBaseCommand(method, port) {
+    return `lsof -i ${method}:${port} | grep ${method.toUpperCase()} | awk '{print $2}' | xargs`;
+  }
+
+  /**
+   * Checks if a process is running on the specified port by using either a fast or normal check based on the current speed setting.
+   * 
+   * @param {number} port - The port number where the process is running.
+   * @returns {Promise<boolean>} A boolean indicating whether a process is running on the specified port.
+   */
+  async checkIfProcessExists(port) {
+    const isFastCheck = this.speed === 'fast';
+    const checkMethod = isFastCheck ? this.isExistFast : this.isExistNormal;
+    return await checkMethod.call(this, port);
   }
 }
 
