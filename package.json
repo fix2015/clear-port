@@ -1,6 +1,6 @@
 {
   "name": "port-client",
-  "version": "1.4.1",
+  "version": "1.4.5",
   "description": "A powerful utility for managing processes on specified ports, including options for checking port status, killing processes, handling multiple ports, enabling interactive mode, and supporting graceful termination.",
   "main": "dist/index.js",
   "scripts": {

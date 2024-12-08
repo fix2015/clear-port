@@ -1,7 +1,7 @@
 ![alt text](image.png)
 # Port Client
 
-The `Port Client` class offers a **killer feature**: **fast operations**. By using the `--fast` flag in the command-line interface (CLI) or setting the `speed: 'fast'` option in the script, users can perform port operations **100 times faster** than the default safe mode. This feature skips extra checks and immediately acts on the specified ports, making it ideal for users who need quick results when checking or killing ports.
+The `Port Client` class offers a **killer feature**: **fast operations**. 
 
 ## Table of Contents
 
