@@ -96,3 +96,10 @@ port.execute()
 ## Conclusion
 
 The `Port Client` class offers a flexible and interactive way to manage ports, whether you're checking if they're active, killing processes associated with them, or performing dry runs to preview actions. It can be used in a Node.js script or directly in the shell using the provided CLI script.
+
+## Connect with Me:
+- [LinkedIn - Vitalii Semianchuk](https://www.linkedin.com/in/vitalii-semianchuk-9812a786/)
+- [Telegram - @jsmentorfree](https://t.me/jsmentorfree) - We do a lot of free teaching on this channel! Join us to learn and grow in web development.
+- [Tiktok - @jsmentoring](https://www.tiktok.com/@jsmentoring) Everyday new videos
+- [Youtube - @jsmentor-uk](https://www.youtube.com/@jsmentor-uk) Mentor live streams
+- [Dev.to - fix2015](https://dev.to/fix2015) Javascript featured, live, experience
