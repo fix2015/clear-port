@@ -4,19 +4,8 @@ npm-debug.log
 yarn-debug.log
 yarn-error.log
 
-# Logs
-logs/
-*.log
-*.log.*
-
-# Dependency directories
-jspm_packages/
-
 # Build directories
 build/
-
-# Webpack
-/.webpack/
 
 # SCSS and Sass files
 *.css.map
@@ -29,7 +18,6 @@ build/
 
 # Operating system files
 .DS_Store
-Thumbs.db
 
 # Package-lock.json or Yarn lock file
 package-lock.json
