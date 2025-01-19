@@ -72,6 +72,8 @@ const range = args.filter || null;
  */
 const action = args.kill ? 'kill' : args.action || 'check';
 
+const permissions = args.permissions || false;
+
 /** 
  * Ensure port is an array for consistent processing.
  */
@@ -93,7 +95,8 @@ Promise.all(
       verbose,
       graceful,
       filter,
-      range
+      range,
+      permissions
     })
       .then((result) => {
         verbose && console.log(`Process on port ${action} ${current}`);

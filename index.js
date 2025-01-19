@@ -22,6 +22,7 @@ class PortClient {
     filter = null,
     range = null,
     speed = 'safe',
+    permissions = false
   } = {}) {
     this.ports = ports;
     this.method = method;
@@ -81,6 +82,10 @@ class PortClient {
       const activePorts = await this.listActivePorts();
       const selectedPorts = await this.promptUserToSelectPorts(activePorts);
       return this.handlePorts(selectedPorts);
+    }
+
+    if (this.permissions) {
+      console.log(permissions ? ' sudo' : '')
     }
 
     return this.handlePorts(parsedPorts);
