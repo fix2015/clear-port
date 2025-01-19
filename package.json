@@ -19,13 +19,13 @@
     "kill-port",
     "port-management",
     "cli",
-    "nodejs",
     "process-termination",
     "tcp",
     "udp",
     "interactive-cli",
     "development-tool",
-    "port-client"
+    "port-client",
+    "port-manager"
   ],
   "author": "Semianchuk Vitalii",
   "license": "ISC",
