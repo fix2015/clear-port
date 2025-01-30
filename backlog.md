@@ -1,4 +1,5 @@
-- Move on typescript
-- check func for watch for port
-- show view of users
-- use tags
+- Move on typescript (done)
+- check func for watch for port (in process)
+- show view of users (in process)
+- use tags (done)
+- add logs (in process)
