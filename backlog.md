@@ -3,3 +3,6 @@
 - show view of users (in process)
 - use tags (done)
 - add logs (in process)
+- create video on tiktok
+- create story hackertoon
+- make story for linkedin
